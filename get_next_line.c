@@ -1,109 +1,126 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ofranco <marvin@42.fr>                     +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/09/14 13:41:24 by ofranco           #+#    #+#             */
-/*   Updated: 2017/09/16 19:59:10 by ofranco          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include <stdio.h>
 #include "get_next_line.h"
-#include "libft.h"
+#include <stdio.h>
 
-char	*ft_strcharcpy(char *src, char c)
+int	ft_strfindchr(char *str,char c)
 {
-	int		i;
-	char	*cpy;
+	int	i;
 
+	if (c == '\0')
+		return (ft_strlen(str));
 	i = 0;
-	while (src[i] != c)
+	while (str[i] != '\0')
 	{
-		if (src[i] == '\0')
-			break ;
-		i++;
+		if (str[i] == c)
+			return (i);
+		else
+			i++;
 	}
-	if ((cpy = (char*)malloc(sizeof(char) * i + 1)) == NULL)
-		return (NULL);
-	cpy = ft_strncpy(cpy, src, i);
-	cpy[i]= '\0';
-	return (cpy);
+	return (-1);
 }
 
-int		ft_chrono(int fd, char **buffer)
+int	 ft_transfer_else(char *src, char **dest, int pos, int i, char *tmp)
 {
-	int ret;
-
-	if ((*buffer = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1))) == NULL)
-		return (-2);
-	ret = read(fd, *buffer, BUFF_SIZE);
-	(*buffer)[ret] = '\0';
-	return (ret);
-}
-
-int		ft_if_return(char *empty, char **line, char **leftover)
-{
-	if (ft_strchr(empty, '\n') != NULL)
-	{
-		//printf("empty =%s\n", empty);
-		*line = ft_strcharcpy(empty, '\n');
-		*leftover = ft_strdup(ft_strchr(empty, '\n') + 1);
-		//printf("line =%s\n", *line);
-		//printf("leftover =%s\n", *leftover);
-		return (1);
-	}
-	return (0);
-}
-
-void	ft_remains(char *empty, char **leftover)
-{
-	char *tmp;
-	
-	if (ft_strchr(empty, '\n') != NULL)
-	{	
-		*leftover = ft_strdup(ft_strchr(empty, '\n') + 1);
-	else 
-		*leftover = NULL;
-}
-
-
-
-int		get_next_line(const int fd, char **line)
-{
-	static char	*leftover[5000];
-	char		*str;
-	char		*empty;
-	int		read_value;
-	char 		*tmp;
-
-	if ((int)fd < 0)
-		return (-1);
-	empty = (leftover[fd] == NULL) ? ft_strnew(0) : leftover[fd];
-	if (ft_if_return(empty, line, &leftover[fd]) == 1)
-	{
-		return (1);
-	}
-	while ((read_value = ft_chrono(fd, &str)) > 0)
-	{
-		tmp = empty;
-		empty = ft_strjoin(empty, str);
+		src[pos] = '\0';
+		*dest = ft_strjoin(*dest,src);
 		free(tmp);
-		if (ft_strchr(empty, '\n') != NULL)
-			break ;
-	}
-	if (read_value < 0 || fd < 0)
-		return (-1);
-	ft_remains(empty, &leftover[fd]);
-	*line = ft_strcharcpy(empty, '\n');
-	if (*line[0] == '\0' && read_value == 0 && leftover[fd] == NULL)
-		return (0);
-	return (1);
+		pos++;
+		i = 0;
+		while(src[pos] != '\0')
+		{
+			src[i] = src[pos];
+			i++;
+			pos++;
+		}
+		src[i] = '\0';
+		//printf("Return 1\n");
+		return (1);
+
 }
 
-int main(int argc, char **argv)
+int	ft_transfer(char *src,char **dest)
+{
+	int	pos;
+	int	i;
+	char	*tmp;
+	
+	i = 0;
+	//printf("entree dans ft_transfer\n");
+	pos = ft_strfindchr(src, '\n');
+	tmp = *dest;
+	if (pos==-1)
+	{
+		*dest = ft_strjoin(*dest,src);
+		free(tmp);
+		src[0] = '\0';
+		//printf("return 0\n");
+		return (0);
+	} 
+	else 
+		return (ft_transfer_else(src, dest, pos, i, tmp));
+}
+
+/*int	ft_halfs(char *buffer, char *line, int fd)
+  {
+  int read_ret;
+
+  if (ft_transfer(buffer, &line))
+  return (1);
+  while ((read_ret = read(fd, &buffer, BUFF_SIZE)) > 0)
+  {
+  printf("avant buffer: read_ret ==%d\n", read_ret);
+  buffer[read_ret] = '\0';
+  printf("apres buffer\n");
+  if (ft_transfer(buffer, &line))
+  {	
+  return (1);
+  }
+  }
+  if (read_ret == 0)
+  {
+  return (ft_strlen(line) == 0 ? 0 : 1);
+  }
+  return (-5);
+  }*/
+
+int	normidead(char *buffer, int read_ret, char **line, const int fd)
+{
+		if (ft_transfer(buffer,line))
+		return (1);
+	while ((read_ret = read(fd, buffer, BUFF_SIZE)) > 0)
+	{
+		buffer[read_ret] = '\0';
+		if (ft_transfer(buffer, line))
+			return (1);
+	}
+	if (read_ret == 0)
+		return (ft_strlen(*line) == 0 ? 0 : 1);
+	free(*line);
+	*line = NULL;
+	return (-1);
+}
+
+int	get_next_line(const int fd, char **line)
+{
+	static char	*buffer;
+	static int	current_fd = -1;
+	int 	read_ret;
+
+	read_ret = 0;
+	if (fd < 0 || !line)
+		return (-1);
+	if (!buffer && (buffer = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1))) == NULL)
+		return (-1);
+	//printf("len =%lu\n", ft_strlen(buffer));
+	if (fd != current_fd)
+		buffer[0] = '\0';
+	current_fd = fd;
+	*line = ft_strnew(0);
+	//if ((read_ret = ft_halfs(buffer, *line, fd)) >= 0)
+	//	return (read_ret);
+	return(normidead(buffer, read_ret, line, fd));
+}
+
+/*int main(int argc, char **argv)
 {
 	char *buffer;
 	int fd;
@@ -114,7 +131,8 @@ int main(int argc, char **argv)
 	fd = open(argv[1], O_RDONLY, S_IREAD);
 	while ((result = get_next_line(fd, &buffer)) > 0)
 	{
-		printf("%s", buffer);
+		printf("result = %d\n", result);
+		printf("%s\n", buffer);
 	}
 	return (0);
-}
+}*/
