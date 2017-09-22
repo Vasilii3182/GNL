@@ -5,12 +5,12 @@ int	ft_strfindchr(char *str,char c)
 {
 	int	i;
 
-	if (c=='\0')
+	if (c == '\0')
 		return (ft_strlen(str));
 	i = 0;
-	while (str[i]!='\0')
+	while (str[i] != '\0')
 	{
-		if (str[i]==c)
+		if (str[i] == c)
 			return (i);
 		else
 			i++;
@@ -54,35 +54,28 @@ int	ft_transfer(char *src,char **dest)
 	}
 }
 
-int	ft_halfs(char **buffer,char *line, int fd)
+/*int	ft_halfs(char *buffer, char *line, int fd)
 {
 	int read_ret;
 
-	if (ft_transfer(*buffer, &line))
-	{
-		//printf("return 1 dans halfs?\n");
+	if (ft_transfer(buffer, &line))
 		return (1);
-	}
-	//printf("avant boucle dans halfs\n");
-	while ((read_ret = read(fd, *buffer, BUFF_SIZE)) > 0)
+	while ((read_ret = read(fd, &buffer, BUFF_SIZE)) > 0)
 	{
-		//printf("avant buffer: read_ret ==%d\n", read_ret);
-		buffer[read_ret] = 0;
-		//printf("apres buffer\n");
-		if (ft_transfer(*buffer, &line))
+		printf("avant buffer: read_ret ==%d\n", read_ret);
+		buffer[read_ret] = '\0';
+		printf("apres buffer\n");
+		if (ft_transfer(buffer, &line))
 		{	
-			//printf("deuxieme ft_transfert\n");
 			return (1);
 		}
-		//printf("fin boucle\n");
 	}
 	if (read_ret == 0)
 	{
-		//printf("read_ret == 0\n");
 		return (ft_strlen(line) == 0 ? 0 : 1);
 	}
 	return (-5);
-}
+}*/
 
 int	get_next_line(const int fd, char **line)
 {
@@ -94,26 +87,23 @@ int	get_next_line(const int fd, char **line)
 		return (-1);
 	if (!buffer && (buffer = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1))) == NULL)
 		return (-1);
+	printf("len =%lu\n", ft_strlen(buffer));
 	if (fd != current_fd)
 		buffer[0] = '\0';
 	current_fd = fd;
 	*line = ft_strnew(0);
-	if ((read_ret = ft_halfs(&buffer, *line, fd)) >= 0)
+	//if ((read_ret = ft_halfs(buffer, *line, fd)) >= 0)
+	//	return (read_ret);
+	if (ft_transfer(buffer,line))
+	return (1);
+	while ((read_ret = read(fd, buffer, BUFF_SIZE)) > 0)
 	{
-		//printf("coucou\n");
-		//printf("READ_RET=%d\n", read_ret);
-		return (read_ret);
+	buffer[read_ret] = '\0';
+	if (ft_transfer(buffer, line))
+	return (1);
 	}
-	/*if (ft_transfer(buffer,line))
-	  return (1);
-	  while ((read_ret = read(fd, buffer, BUFF_SIZE)) > 0)
-	  {
-	  buffer[read_ret] = '\0';
-	  if (ft_transfer(buffer, line))
-	  return (1);
-	  }
-	  if (read_ret == 0)
-	  return (ft_strlen(*line) == 0 ? 0 : 1);*/
+	if (read_ret == 0)
+	return (ft_strlen(*line) == 0 ? 0 : 1);
 	free(*line);
 	*line = NULL;
 	return (-1);

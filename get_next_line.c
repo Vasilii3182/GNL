@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include "get_next_line.h"
+#include "libft.h"
 
 char	*ft_strcharcpy(char *src, char c)
 {
@@ -59,29 +60,37 @@ int		ft_if_return(char *empty, char **line, char **leftover)
 
 void	ft_remains(char *empty, char **leftover)
 {
+	char *tmp;
+	
 	if (ft_strchr(empty, '\n') != NULL)
+	{	
 		*leftover = ft_strdup(ft_strchr(empty, '\n') + 1);
 	else 
 		*leftover = NULL;
 }
+
+
 
 int		get_next_line(const int fd, char **line)
 {
 	static char	*leftover[5000];
 	char		*str;
 	char		*empty;
-	int			read_value;
+	int		read_value;
+	char 		*tmp;
 
 	if ((int)fd < 0)
 		return (-1);
-	empty = (leftover[fd] == NULL) ? "" : leftover[fd];
+	empty = (leftover[fd] == NULL) ? ft_strnew(0) : leftover[fd];
 	if (ft_if_return(empty, line, &leftover[fd]) == 1)
 	{
 		return (1);
 	}
 	while ((read_value = ft_chrono(fd, &str)) > 0)
 	{
+		tmp = empty;
 		empty = ft_strjoin(empty, str);
+		free(tmp);
 		if (ft_strchr(empty, '\n') != NULL)
 			break ;
 	}
