@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ofranco <marvin@42.fr>                     +#+  +:+       +#+        */
+/*   By: atyrode <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/02/15 15:08:42 by ofranco           #+#    #+#             */
-/*   Updated: 2017/09/22 19:37:30 by atyrode          ###   ########.fr       */
+/*   Created: 2017/09/22 20:47:38 by atyrode           #+#    #+#             */
+/*   Updated: 2017/09/22 20:56:48 by atyrode          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define GET_NEXT_LINE_H_
 # include <fcntl.h>
 # include <stdlib.h>
-# include "libft.h"
+# include "./libft/includes/libft.h"
 
 # define BUFF_SIZE 5
 
