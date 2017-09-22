@@ -1,5 +1,5 @@
 #include "get_next_line.h"
-//#include <stdio.h>
+#include <stdio.h>
 
 int	ft_strfindchr(char *str,char c)
 {
@@ -20,36 +20,67 @@ int	ft_strfindchr(char *str,char c)
 
 int	ft_transfer(char *src,char **dest)
 {
-	int pos;
-	int i;
-	char *tmp;
+	int	pos;
+	int	i;
+	char	*tmp;
  	
- 	pos = ft_strfindchr(src, '\n');
+ 	printf("entree dans ft_transfer\n");
+	pos = ft_strfindchr(src, '\n');
     	tmp = *dest;
         if (pos==-1)
 	{
             *dest = ft_strjoin(*dest,src);
             free(tmp);
-            src[0]='\0';
+            src[0] = '\0';
+            printf("return 0\n");
             return (0);
         } 
 	else 
 	{
-		src[pos]='\0';
-		*dest=ft_strjoin(*dest,src);
+		src[pos] = '\0';
+		*dest = ft_strjoin(*dest,src);
 		free(tmp);
 		pos++;
-		i=0;
-		while(src[pos]!='\0')
+		i = 0;
+		while(src[pos] != '\0')
 		{
-			src[i]=src[pos];
+			src[i] = src[pos];
                 	i++;
                 	pos++;
         	}
-        	src[i]='\0';
+        	src[i] = '\0';
+		printf("Return 1\n");
         	return (1);
         }
  }
+
+int	ft_halfs(char **buffer,char *line, int fd)
+{
+	int read_ret;
+	
+	if (ft_transfer(*buffer, &line))
+	{
+		printf("return 1 dans halfs?\n");
+		return (1);
+	}
+	printf("avant boucle dans halfs\n");
+	while ((read_ret = read(fd, *buffer, BUFF_SIZE)) > 0)
+	{
+		printf("avant buffer = 0\n");
+		*buffer[read_ret] = '\0';
+		if (ft_transfer(*buffer, &line))
+		{	
+			printf("deuxieme ft_transfert\n");
+			return (1);
+		}
+	}
+	if (read_ret == 0)
+	{
+		printf("read_ret == 0\n");
+		return (ft_strlen(line) == 0 ? 0 : 1);
+	}
+	return (-5);
+}
 
 int	get_next_line(const int fd, char **line)
 {
@@ -59,24 +90,46 @@ int	get_next_line(const int fd, char **line)
     
     if (fd < 0 || !line)
         return (-1);
-    if (!buffer && 
-	(buffer = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1))) == NULL)
+    if (!buffer && (buffer = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1))) == NULL)
         return (-1);
     if (fd != current_fd)
-        buffer[0] = '\0';
+	buffer[0] = '\0';
     current_fd = fd;
     *line = ft_strnew(0);
-    if (transfer(buffer,line))
-        return (1);
+    if ((read_ret = ft_halfs(&buffer, *line, fd)) >= 0)
+    {
+	printf("coucou\n");
+	printf("READ_RET=%d\n", read_ret);
+	return (read_ret);
+    }
+    /*if (ft_transfer(buffer,line))
+	return (1);
     while ((read_ret = read(fd, buffer, BUFF_SIZE)) > 0)
     {
         buffer[read_ret] = '\0';
-        if (transfer(buffer, line))
+        if (ft_transfer(buffer, line))
             return (1);
     }
     if (read_ret == 0)
-        return (ft_strlen(*line) == 0 ? 0 : 1);
+        return (ft_strlen(*line) == 0 ? 0 : 1);*/
     free(*line);
     *line = NULL;
     return (-1);
+}
+
+int main(int argc, char **argv)
+{
+        char *buffer;
+        int fd;
+        int result;
+
+        if (argc > 2)
+                return (7);
+        fd = open(argv[1], O_RDONLY, S_IREAD);
+        while ((result = get_next_line(fd, &buffer)) > 0)
+        {
+                printf("result = %d\n", result);
+		printf("%s\n", buffer);
+        }
+        return (0);
 }
