@@ -23,18 +23,18 @@ int	ft_transfer(char *src,char **dest)
 	int	pos;
 	int	i;
 	char	*tmp;
- 	
- 	printf("entree dans ft_transfer\n");
+
+	//printf("entree dans ft_transfer\n");
 	pos = ft_strfindchr(src, '\n');
-    	tmp = *dest;
-        if (pos==-1)
+	tmp = *dest;
+	if (pos==-1)
 	{
-            *dest = ft_strjoin(*dest,src);
-            free(tmp);
-            src[0] = '\0';
-            printf("return 0\n");
-            return (0);
-        } 
+		*dest = ft_strjoin(*dest,src);
+		free(tmp);
+		src[0] = '\0';
+		//printf("return 0\n");
+		return (0);
+	} 
 	else 
 	{
 		src[pos] = '\0';
@@ -45,38 +45,40 @@ int	ft_transfer(char *src,char **dest)
 		while(src[pos] != '\0')
 		{
 			src[i] = src[pos];
-                	i++;
-                	pos++;
-        	}
-        	src[i] = '\0';
-		printf("Return 1\n");
-        	return (1);
-        }
- }
+			i++;
+			pos++;
+		}
+		src[i] = '\0';
+		//printf("Return 1\n");
+		return (1);
+	}
+}
 
 int	ft_halfs(char **buffer,char *line, int fd)
 {
 	int read_ret;
-	
+
 	if (ft_transfer(*buffer, &line))
 	{
-		printf("return 1 dans halfs?\n");
+		//printf("return 1 dans halfs?\n");
 		return (1);
 	}
-	printf("avant boucle dans halfs\n");
+	//printf("avant boucle dans halfs\n");
 	while ((read_ret = read(fd, *buffer, BUFF_SIZE)) > 0)
 	{
-		printf("avant buffer = 0\n");
-		*buffer[read_ret] = '\0';
+		//printf("avant buffer: read_ret ==%d\n", read_ret);
+		buffer[read_ret] = 0;
+		//printf("apres buffer\n");
 		if (ft_transfer(*buffer, &line))
 		{	
-			printf("deuxieme ft_transfert\n");
+			//printf("deuxieme ft_transfert\n");
 			return (1);
 		}
+		//printf("fin boucle\n");
 	}
 	if (read_ret == 0)
 	{
-		printf("read_ret == 0\n");
+		//printf("read_ret == 0\n");
 		return (ft_strlen(line) == 0 ? 0 : 1);
 	}
 	return (-5);
@@ -84,52 +86,52 @@ int	ft_halfs(char **buffer,char *line, int fd)
 
 int	get_next_line(const int fd, char **line)
 {
-    static char	*buffer;
-    static int	current_fd = -1;
-    int 	read_ret;
-    
-    if (fd < 0 || !line)
-        return (-1);
-    if (!buffer && (buffer = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1))) == NULL)
-        return (-1);
-    if (fd != current_fd)
-	buffer[0] = '\0';
-    current_fd = fd;
-    *line = ft_strnew(0);
-    if ((read_ret = ft_halfs(&buffer, *line, fd)) >= 0)
-    {
-	printf("coucou\n");
-	printf("READ_RET=%d\n", read_ret);
-	return (read_ret);
-    }
-    /*if (ft_transfer(buffer,line))
-	return (1);
-    while ((read_ret = read(fd, buffer, BUFF_SIZE)) > 0)
-    {
-        buffer[read_ret] = '\0';
-        if (ft_transfer(buffer, line))
-            return (1);
-    }
-    if (read_ret == 0)
-        return (ft_strlen(*line) == 0 ? 0 : 1);*/
-    free(*line);
-    *line = NULL;
-    return (-1);
+	static char	*buffer;
+	static int	current_fd = -1;
+	int 	read_ret;
+
+	if (fd < 0 || !line)
+		return (-1);
+	if (!buffer && (buffer = (char*)malloc(sizeof(char) * (BUFF_SIZE + 1))) == NULL)
+		return (-1);
+	if (fd != current_fd)
+		buffer[0] = '\0';
+	current_fd = fd;
+	*line = ft_strnew(0);
+	if ((read_ret = ft_halfs(&buffer, *line, fd)) >= 0)
+	{
+		//printf("coucou\n");
+		//printf("READ_RET=%d\n", read_ret);
+		return (read_ret);
+	}
+	/*if (ft_transfer(buffer,line))
+	  return (1);
+	  while ((read_ret = read(fd, buffer, BUFF_SIZE)) > 0)
+	  {
+	  buffer[read_ret] = '\0';
+	  if (ft_transfer(buffer, line))
+	  return (1);
+	  }
+	  if (read_ret == 0)
+	  return (ft_strlen(*line) == 0 ? 0 : 1);*/
+	free(*line);
+	*line = NULL;
+	return (-1);
 }
 
 int main(int argc, char **argv)
 {
-        char *buffer;
-        int fd;
-        int result;
+	char *buffer;
+	int fd;
+	int result;
 
-        if (argc > 2)
-                return (7);
-        fd = open(argv[1], O_RDONLY, S_IREAD);
-        while ((result = get_next_line(fd, &buffer)) > 0)
-        {
-                printf("result = %d\n", result);
+	if (argc > 2)
+		return (7);
+	fd = open(argv[1], O_RDONLY, S_IREAD);
+	while ((result = get_next_line(fd, &buffer)) > 0)
+	{
+		printf("result = %d\n", result);
 		printf("%s\n", buffer);
-        }
-        return (0);
+	}
+	return (0);
 }
